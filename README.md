@@ -33,7 +33,7 @@ relevant command with `command -v` and skips gracefully if it's missing.
 
 ```
 system-maintenance/
-├── maintenance.sh          # Main entry point / orchestrator
+├── main.sh          # Main entry point / orchestrator
 ├── lib/
 │   └── helpers.sh          # Logging, run_cmd(), disk usage, reboot check
 └── modules/
@@ -50,14 +50,14 @@ system-maintenance/
    machine, e.g. `/opt/system-maintenance` or `~/system-maintenance`.
 2. Make the scripts executable (only needed once):
    ```bash
-   chmod +x maintenance.sh lib/helpers.sh modules/*.sh
+   chmod +x main.sh lib/helpers.sh modules/*.sh
    ```
 3. (Optional) Run it on a schedule with cron or a systemd timer.
 
 ## Usage
 
 ```bash
-./maintenance.sh [options]
+./main.sh [options]
 ```
 
 | Option              | Description                                                        |
@@ -72,23 +72,23 @@ system-maintenance/
 
 Preview everything without changing anything:
 ```bash
-./maintenance.sh --dry-run
+./main.sh --dry-run
 ```
 
 Run for real, and reboot automatically if the kernel was updated:
 ```bash
-./maintenance.sh --auto-reboot
+./main.sh --auto-reboot
 ```
 
 Run with aggressive Docker cleanup (removes unused volumes — make sure
 you don't need any stopped-container data first):
 ```bash
-./maintenance.sh --aggressive
+./main.sh --aggressive
 ```
 
 ## Configuration file
 
-On startup, `maintenance.sh` looks for `~/.config/system-maintenance.conf`
+On startup, `main.sh` looks for `~/.config/system-maintenance.conf`
 and sources it if present, letting you override any default without
 editing the scripts. Example:
 
@@ -107,7 +107,7 @@ group or others. Lock it down with:
 chmod 600 ~/.config/system-maintenance.conf
 ```
 
-If the permissions aren't safe, `maintenance.sh` logs a warning and
+If the permissions aren't safe, `main.sh` logs a warning and
 skips the file rather than sourcing it.
 
 ## Logging
@@ -136,7 +136,7 @@ file.
 ## Exit behavior
 
 The script uses `set -Eeuo pipefail` with a global error trap: if any
-command fails, `maintenance.sh` stops immediately, logs the failing
+command fails, `main.sh` stops immediately, logs the failing
 line number and exit code, and exits with that same code — it won't
 silently continue into later phases after a failure.
 
@@ -146,5 +146,5 @@ To add a new maintenance step:
 
 1. Create `modules/06_yourstep.sh` following the existing pattern
    (a header comment, then calls to `log`/`run_cmd`).
-2. Add `source "./modules/06_yourstep.sh"` to `maintenance.sh` in the
+2. Add `source "./modules/06_yourstep.sh"` to `main.sh` in the
    **Run** section, in the order you want it executed.
